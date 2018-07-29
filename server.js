@@ -1,23 +1,38 @@
-'use strict';
+'use strict'
 
-var express = require('express');
-var cors = require('cors');
+var express = require('express')
 
-// require and use "multer"...
+var cors = require('cors')
 
-var app = express();
+var multer = require('multer')
 
-app.use(cors());
-app.use('/public', express.static(process.cwd() + '/public'));
+var storage = multer.memoryStorage()
+
+var upload = multer({storage: storage})
+
+var app = express()
+
+app.use(cors())
+
+app.use('/public', express.static(process.cwd() + '/public'))
 
 app.get('/', function (req, res) {
-     res.sendFile(process.cwd() + '/views/index.html');
-  });
+    res.sendFile(process.cwd() + '/view/index.html')
+})
 
-app.get('/hello', function(req, res){
-  res.json({greetings: "Hello, API"});
-});
+app.post('/api/fileanalyse', upload.single('upfile'), function (req, res){
+    res.json({
+        'name': req.file.originalname,
+        'type': req.file.mimetype,
+        'size': req.file.size
+    })
+})
+
+app.use(function(req, res, next){
+    res.status(404)
+    res.type('txt').send('Not found')
+})
 
 app.listen(process.env.PORT || 3000, function () {
-  console.log('Node.js listening ...');
-});
+    console.log('Node.js listening...')
+})
